@@ -287,41 +287,42 @@ export default function ExploreScreen() {
         </ThemedView>
       ) : (
         <View style={styles.historyList}>
-          {history.length > 0 && history.map((item, index) => {
-            if (!item) {
-              console.warn(`Invalid history item at index ${index}`);
-              return null;
-            }
-            if (!item?.id || !item?.type) {
-              console.warn("Invalid history item:", item);
-              return null;
-            }
+          {history.length > 0 &&
+            history.map((item, index) => {
+              if (!item) {
+                console.warn(`Invalid history item at index ${index}`);
+                return null;
+              }
+              if (!item?.id || !item?.type) {
+                console.warn("Invalid history item:", item);
+                return null;
+              }
 
-            const iconName = item.type === "SIP" ? "chart-line" : "chart-timeline-variant";
-            const isSelected = selectedItem === item.id;
+              const iconName = item.type === "SIP" ? "chart-line" : "chart-timeline-variant";
+              const isSelected = selectedItem === item.id;
 
-            return (
-              <TouchableOpacity
-                key={item.id}
-                style={[styles.historyItem, dynamicStyles.historyItem, isSelected && styles.selectedItem]}
-                onPress={() => setSelectedItem(isSelected ? null : item.id)}
-                accessible={true}
-                accessibilityLabel={`${item.type} calculation history item`}
-                accessibilityHint="Double tap to view calculation details"
-              >
-                <View style={styles.itemHeader}>
-                  <View style={styles.typeContainer}>
-                    <MaterialCommunityIcons name={iconName} size={24} color={Colors[colorScheme ?? "light"].text} />
-                    <ThemedText type="defaultSemiBold" style={styles.itemType}>
-                      {item.type} Calculation
-                    </ThemedText>
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[styles.historyItem, dynamicStyles.historyItem, isSelected && styles.selectedItem]}
+                  onPress={() => setSelectedItem(isSelected ? null : item.id)}
+                  accessible={true}
+                  accessibilityLabel={`${item.type} calculation history item`}
+                  accessibilityHint="Double tap to view calculation details"
+                >
+                  <View style={styles.itemHeader}>
+                    <View style={styles.typeContainer}>
+                      <MaterialCommunityIcons name={iconName} size={24} color={Colors[colorScheme ?? "light"].text} />
+                      <ThemedText type="defaultSemiBold" style={styles.itemType}>
+                        {item.type} Calculation
+                      </ThemedText>
+                    </View>
+                    <MaterialCommunityIcons name={isSelected ? "chevron-up" : "chevron-down"} size={24} color={Colors[colorScheme ?? "light"].text} />
                   </View>
-                  <MaterialCommunityIcons name={isSelected ? "chevron-up" : "chevron-down"} size={24} color={Colors[colorScheme ?? "light"].text} />
-                </View>
-                {isSelected && renderDetailCard(item)}
-              </TouchableOpacity>
+                  {isSelected && renderDetailCard(item)}
+                </TouchableOpacity>
               );
-            })} 
+            })}
         </View>
       )}
     </ScrollView>
