@@ -7,6 +7,7 @@ import { ResultsChart } from "./ResultsChart";
 import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
 
 interface ValidationErrors {
   monthlyInvestment?: string;
@@ -141,32 +142,31 @@ export function SIPCalculator() {
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.calculateButton} onPress={calculateResults}>
-            <MaterialCommunityIcons name="calculator" size={24} color="white" />
+          <TouchableOpacity style={[styles.calculateButton, styles.buttonShadow]} onPress={calculateResults}>
+            <MaterialCommunityIcons name="calculator" size={20} color="white" />
             <Text style={styles.buttonText}>Calculate</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
-            <MaterialCommunityIcons name="refresh" size={24} color="#666" />
+          <TouchableOpacity style={[styles.resetButton, styles.buttonShadow]} onPress={resetCalculator}>
+            <MaterialCommunityIcons name="refresh" size={20} color="#666" />
             <Text style={styles.resetButtonText}>Reset</Text>
           </TouchableOpacity>
         </View>
 
         {showResults && (
           <Animated.View style={[styles.resultsContainer, { opacity: fadeAnim }]}>
-            {/* <ResultsChart data={results.data} labels={results.labels} title="Investment Growth" /> */}
-            <View style={styles.summaryContainer}>
-              <Text style={styles.summaryTitle}>Summary</Text>
+            <View style={[styles.card, styles.summaryContainer]}>
+              <Text style={styles.cardTitle}>Summary</Text>
               <Text style={styles.summaryText}>Total Investment: ₹{(parseInt(duration) * 12 * parseFloat(monthlyInvestment)).toLocaleString()}</Text>
 
-              <Text style={[styles.summarySubtitle, { marginTop: 16 }]}>Without Inflation Adjustment</Text>
+              <Text style={[styles.summarySubtitle, { marginTop: 12 }]}>Without Inflation Adjustment</Text>
               <Text style={styles.summaryText}>
                 Expected Returns: ₹
                 {(results.nominalData[results.nominalData.length - 1] - parseInt(duration) * 12 * parseFloat(monthlyInvestment)).toLocaleString()}
               </Text>
               <Text style={styles.summaryText}>Total Value: ₹{results.nominalData[results.nominalData.length - 1].toLocaleString()}</Text>
 
-              <Text style={[styles.summarySubtitle, { marginTop: 16 }]}>With Inflation Adjustment</Text>
+              <Text style={[styles.summarySubtitle, { marginTop: 12 }]}>With Inflation Adjustment</Text>
               <Text style={styles.summaryText}>
                 Expected Returns: ₹
                 {(results.data[results.data.length - 1] - parseInt(duration) * 12 * parseFloat(monthlyInvestment)).toLocaleString()}
@@ -174,8 +174,8 @@ export function SIPCalculator() {
               <Text style={styles.summaryText}>Total Value: ₹{results.data[results.data.length - 1].toLocaleString()}</Text>
             </View>
 
-            <View style={styles.phaseContainer}>
-              <Text style={styles.phaseTitle}>Investment Phases</Text>
+            <View style={[styles.card, styles.phaseContainer]}>
+              <Text style={styles.cardTitle}>Investment Phases</Text>
 
               <View style={styles.phaseItem}>
                 <Text style={styles.phaseLabel}>Short Term (1-3 years)</Text>
@@ -193,8 +193,8 @@ export function SIPCalculator() {
               </View>
             </View>
 
-            <View style={styles.insightContainer}>
-              <Text style={styles.insightTitle}>Key Insights</Text>
+            <View style={[styles.card, styles.insightContainer]}>
+              <Text style={styles.cardTitle}>Key Insights</Text>
               <Text style={styles.insightText}>• Monthly Investment: ₹{parseFloat(monthlyInvestment).toLocaleString()}</Text>
               <Text style={styles.insightText}>
                 • Wealth Multiplier: {(results.data[results.data.length - 1] / (parseInt(duration) * 12 * parseFloat(monthlyInvestment))).toFixed(2)}x
@@ -217,7 +217,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
+    padding: Platform.select({
+      ios: 12,
+      android: 12,
+      default: 20,
+    }),
   },
   header: {
     marginBottom: 24,
@@ -233,7 +237,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   inputContainer: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   input: {
     marginBottom: 16,
@@ -241,64 +245,90 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 20,
+    gap: 8,
+  },
+  buttonShadow: {
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
   calculateButton: {
     flexDirection: "row",
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 24,
+    backgroundColor: Colors.light.tint,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
-    flex: 0.48,
+    flex: 1,
     justifyContent: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   resetButton: {
     flexDirection: "row",
-    backgroundColor: "#F5F5F5",
-    paddingHorizontal: 24,
+    backgroundColor: Platform.select({
+      ios: "rgba(0,0,0,0.03)",
+      android: "rgba(0,0,0,0.03)",
+      default: "#F8FAFC",
+    }),
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
-    flex: 0.48,
+    flex: 1,
     justifyContent: "center",
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
-    marginLeft: 8,
+    marginLeft: 6,
   },
   resetButtonText: {
     color: "#666",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
-    marginLeft: 8,
+    marginLeft: 6,
   },
   resultsContainer: {
     backgroundColor: Platform.select({
-      web: "rgba(248, 249, 250, 0.8)",
-      default: "#F8F9FA",
+      ios: "rgba(248, 250, 252, 0.9)",
+      android: "#F8FAFC",
+      default: "rgba(248, 250, 252, 0.9)",
     }),
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 12,
+    gap: 12,
+  },
+  card: {
+    padding: 16,
+    backgroundColor: "white",
     borderRadius: 16,
-    padding: Platform.select({
-      web: 32,
-      default: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
     }),
-    marginTop: 8,
-    maxWidth: Platform.select({
-      web: 1200,
-      default: 900,
-    }),
-    alignSelf: "center",
-    width: "100%",
-    backdropFilter: Platform.OS === "web" ? "blur(10px)" : undefined,
-    boxShadow: Platform.OS === "web" ? "0 4px 6px rgba(0, 0, 0, 0.1)" : undefined,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginBottom: 12,
   },
   summaryContainer: {
     marginTop: 24,
@@ -321,15 +351,16 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   summaryText: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 8,
+    fontSize: 14,
+    color: "#4a4a4a",
+    marginBottom: 6,
   },
   summarySubtitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
-    color: "#444",
-    marginBottom: 8,
+    color: "#2a2a2a",
+    marginBottom: 6,
+    marginTop: 12,
   },
   phaseContainer: {
     marginTop: 16,
@@ -351,16 +382,17 @@ const styles = StyleSheet.create({
   phaseItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 6,
+    paddingVertical: 4,
   },
   phaseLabel: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 13,
+    color: "#4a4a4a",
   },
   phaseValue: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
-    color: "#333",
+    color: "#2a2a2a",
   },
   insightContainer: {
     marginTop: 16,
@@ -376,8 +408,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   insightText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
+    fontSize: 13,
+    color: "#4a4a4a",
+    marginBottom: 6,
+    lineHeight: 18,
   },
 });

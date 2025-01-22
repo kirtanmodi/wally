@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { StyleSheet, ScrollView, View, Animated, TouchableOpacity, Platform, Text } from "react-native";
+import { StyleSheet, ScrollView, View, Animated, TouchableOpacity, Platform, Text, useWindowDimensions } from "react-native";
 import { ThemedView } from "../ThemedView";
 import { InputField } from "./InputField";
 import { calculateSWP } from "@/utils/calculations";
 import { ResultsChart } from "./ResultsChart";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { Colors } from "@/constants/Colors";
 
 interface ValidationErrors {
   initialInvestment?: string;
@@ -30,6 +32,8 @@ export function SWPCalculator() {
     labels: [],
     data: [],
   });
+  const { width, height } = useWindowDimensions();
+  const isSmallDevice = width < 375 || height < 667;
 
   const validateInputs = (): boolean => {
     const newErrors: ValidationErrors = {};
@@ -123,10 +127,10 @@ export function SWPCalculator() {
           />
 
           <InputField
-            label="Expected Return Rate"
+            label="Expected Return"
             value={returnRate}
             onChangeText={setReturnRate}
-            placeholder="Enter percentage"
+            placeholder="Enter %"
             suffix="%"
             keyboardType="numeric"
             error={errors.returnRate}
@@ -137,7 +141,7 @@ export function SWPCalculator() {
             label="Duration"
             value={duration}
             onChangeText={setDuration}
-            placeholder="Enter years"
+            placeholder="Years"
             suffix="Years"
             keyboardType="numeric"
             error={errors.duration}
@@ -146,79 +150,62 @@ export function SWPCalculator() {
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.calculateButton} onPress={calculateResults}>
-            <MaterialCommunityIcons name="calculator" size={24} color="white" />
+          <TouchableOpacity style={[styles.calculateButton, styles.buttonShadow]} onPress={calculateResults}>
+            <MaterialCommunityIcons name="calculator" size={20} color="white" />
             <Text style={styles.buttonText}>Calculate</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
-            <MaterialCommunityIcons name="refresh" size={24} color="#666" />
+          <TouchableOpacity style={[styles.resetButton, styles.buttonShadow]} onPress={resetCalculator}>
+            <MaterialCommunityIcons name="refresh" size={20} color="#666" />
             <Text style={styles.resetButtonText}>Reset</Text>
           </TouchableOpacity>
         </View>
 
         {showResults && (
           <Animated.View style={[styles.resultsContainer, { opacity: fadeAnim }]}>
-            {/* <ResultsChart data={results.data} labels={results.labels} title="Portfolio Balance Over Time" /> */}
-            <View style={styles.summaryContainer}>
-              <Text style={styles.summaryTitle}>Withdrawal Analysis</Text>
+            <View style={[styles.card, styles.summaryContainer]}>
+              <Text style={styles.cardTitle}>Summary</Text>
+              <Text style={styles.summaryText}>Initial Investment: ₹{parseFloat(initialInvestment).toLocaleString()}</Text>
+              <Text style={styles.summaryText}>Monthly Withdrawal: ₹{parseFloat(monthlyWithdrawal).toLocaleString()}</Text>
+              <Text style={styles.summaryText}>Total Withdrawals: ₹{totalWithdrawals.toLocaleString()}</Text>
+              <Text style={styles.summaryText}>Final Balance: ₹{finalBalance.toLocaleString()}</Text>
+            </View>
 
-              <View style={styles.metricsGrid}>
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Initial Investment</Text>
-                  <Text style={styles.metricValue}>₹{parseFloat(initialInvestment).toLocaleString()}</Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Monthly Withdrawal</Text>
-                  <Text style={styles.metricValue}>₹{parseFloat(monthlyWithdrawal).toLocaleString()}</Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Withdrawal Rate</Text>
-                  <Text style={styles.metricValue}>
-                    {(((parseFloat(monthlyWithdrawal) * 12) / parseFloat(initialInvestment)) * 100).toFixed(1)}% yearly
-                  </Text>
-                </View>
-
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricLabel}>Total Withdrawals</Text>
-                  <Text style={styles.metricValue}>₹{totalWithdrawals.toLocaleString()}</Text>
-                </View>
+            <View style={[styles.card, styles.phaseContainer]}>
+              <Text style={styles.cardTitle}>Portfolio Health</Text>
+              <View style={styles.phaseItem}>
+                <Text style={styles.phaseLabel}>Capital Preservation</Text>
+                <Text style={[styles.phaseValue, { color: finalBalance >= parseFloat(initialInvestment) ? "#4CAF50" : "#FFA726" }]}>
+                  {((finalBalance / parseFloat(initialInvestment)) * 100).toFixed(1)}% of initial
+                </Text>
               </View>
 
-              <View style={styles.sustainabilityCard}>
-                <Text style={styles.sustainabilityTitle}>Portfolio Health</Text>
-
-                <View style={styles.healthMetrics}>
-                  <View style={styles.healthItem}>
-                    <Text style={styles.healthLabel}>Capital Preservation</Text>
-                    <Text style={[styles.healthValue, { color: finalBalance >= parseFloat(initialInvestment) ? "#4CAF50" : "#FFA726" }]}>
-                      {((finalBalance / parseFloat(initialInvestment)) * 100).toFixed(1)}% of initial
-                    </Text>
-                  </View>
-
-                  <View style={styles.healthItem}>
-                    <Text style={styles.healthLabel}>Years of Coverage</Text>
-                    <Text style={[styles.healthValue, { color: finalBalance > 0 ? "#4CAF50" : "#F44336" }]}>
-                      {finalBalance > 0
-                        ? `${duration} years+`
-                        : `${Math.floor((results.data.findIndex((balance) => balance <= 0) / results.data.length) * parseInt(duration))} years`}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.recommendationBox}>
-                  <Text style={styles.recommendationTitle}>Recommendation</Text>
-                  <Text style={styles.recommendationText}>
-                    {finalBalance > parseFloat(initialInvestment) * 0.8
-                      ? "✓ Your withdrawal plan is highly sustainable. The portfolio maintains most of its value while providing regular income."
-                      : finalBalance > 0
-                      ? "⚠️ Consider reducing withdrawals to preserve capital for longer-term sustainability."
-                      : "❌ This withdrawal rate depletes your portfolio. Consider reducing monthly withdrawals or exploring other income sources."}
-                  </Text>
-                </View>
+              <View style={styles.phaseItem}>
+                <Text style={styles.phaseLabel}>Withdrawal Rate</Text>
+                <Text style={styles.phaseValue}>
+                  {(((parseFloat(monthlyWithdrawal) * 12) / parseFloat(initialInvestment)) * 100).toFixed(1)}% yearly
+                </Text>
               </View>
+
+              <View style={styles.phaseItem}>
+                <Text style={styles.phaseLabel}>Years of Coverage</Text>
+                <Text style={[styles.phaseValue, { color: finalBalance > 0 ? "#4CAF50" : "#F44336" }]}>
+                  {finalBalance > 0
+                    ? `${duration} years+`
+                    : `${Math.floor((results.data.findIndex((balance) => balance <= 0) / results.data.length) * parseInt(duration))} years`}
+                </Text>
+              </View>
+            </View>
+
+            <View style={[styles.card, styles.insightContainer]}>
+              <Text style={styles.cardTitle}>Recommendation</Text>
+              <Text style={styles.insightText}>
+                {finalBalance > parseFloat(initialInvestment) * 0.8
+                  ? "✓ Your withdrawal plan is highly sustainable. The portfolio maintains most of its value while providing regular income."
+                  : finalBalance > 0
+                  ? "⚠️ Consider reducing withdrawals to preserve capital for longer-term sustainability."
+                  : "❌ This withdrawal rate depletes your portfolio. Consider reducing monthly withdrawals or exploring other income sources."}
+              </Text>
             </View>
           </Animated.View>
         )}
@@ -233,10 +220,14 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
+    padding: Platform.select({
+      ios: 12,
+      android: 12,
+      default: 16,
+    }),
   },
   inputContainer: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   input: {
     marginBottom: 16,
@@ -244,150 +235,115 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 20,
+    gap: 8,
+  },
+  buttonShadow: {
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
   calculateButton: {
     flexDirection: "row",
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 24,
+    backgroundColor: Colors.light.tint,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
-    flex: 0.48,
+    flex: 1,
     justifyContent: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   resetButton: {
     flexDirection: "row",
-    backgroundColor: "#F5F5F5",
-    paddingHorizontal: 24,
+    backgroundColor: Platform.select({
+      ios: "rgba(0,0,0,0.03)",
+      android: "rgba(0,0,0,0.03)",
+      default: "#F8FAFC",
+    }),
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
-    flex: 0.48,
+    flex: 1,
     justifyContent: "center",
   },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
-    marginLeft: 8,
   },
   resetButtonText: {
     color: "#666",
     fontSize: 16,
     fontWeight: "600",
-    marginLeft: 8,
   },
   resultsContainer: {
     backgroundColor: Platform.select({
-      web: "rgba(248, 249, 250, 0.8)",
-      default: "#F8F9FA",
+      ios: "rgba(248, 250, 252, 0.9)",
+      android: "#F8FAFC",
+      default: "rgba(248, 250, 252, 0.9)",
     }),
-    borderRadius: 16,
-    padding: Platform.select({
-      web: 32,
-      default: 16,
-    }),
-    marginTop: 8,
-    maxWidth: Platform.select({
-      web: 1200,
-      default: 900,
-    }),
-    alignSelf: "center",
-    width: "100%",
-    backdropFilter: Platform.OS === "web" ? "blur(10px)" : undefined,
-    boxShadow: Platform.OS === "web" ? "0 4px 6px rgba(0, 0, 0, 0.1)" : undefined,
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 12,
+    gap: 12,
   },
-  summaryContainer: {
-    marginTop: 24,
-    padding: Platform.select({
-      web: 24,
-      default: 16,
-    }),
+  card: {
+    padding: 16,
     backgroundColor: "white",
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
-  summaryTitle: {
-    fontSize: 20,
+  cardTitle: {
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 16,
     color: "#333",
   },
-  metricsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 16,
-    gap: 16,
+  summaryContainer: {
+    marginBottom: 24,
   },
-  metricItem: {
-    flex: 1,
-    minWidth: "45%",
-    backgroundColor: "#F8F9FA",
-    padding: 12,
-    borderRadius: 8,
-  },
-  metricLabel: {
+  summaryText: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 4,
   },
-  metricValue: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+  phaseContainer: {
+    marginBottom: 24,
   },
-  sustainabilityCard: {
-    marginTop: 24,
-    backgroundColor: "#F8F9FA",
-    padding: 16,
-    borderRadius: 12,
-  },
-  sustainabilityTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 16,
-  },
-  healthMetrics: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  healthItem: {
-    flex: 1,
-  },
-  healthLabel: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
-  },
-  healthValue: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  recommendationBox: {
-    backgroundColor: "white",
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  recommendationTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+  phaseItem: {
     marginBottom: 8,
   },
-  recommendationText: {
+  phaseLabel: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+  },
+  phaseValue: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  insightContainer: {
+    marginBottom: 24,
+  },
+  insightText: {
     fontSize: 14,
     lineHeight: 20,
     color: "#666",
