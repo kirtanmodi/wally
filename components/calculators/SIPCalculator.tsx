@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, ScrollView, View, Animated, TouchableOpacity, Platform } from "react-native";
+import { StyleSheet, ScrollView, View, Animated, TouchableOpacity, Platform, useWindowDimensions } from "react-native";
 import { ThemedView } from "../ThemedView";
 import { InputField } from "./InputField";
 import { calculateSIP } from "@/utils/calculations";
@@ -8,6 +8,8 @@ import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
+import { saveCalculationHistory } from "@/utils/history";
+import { YearlyBreakdown } from "./YearlyBreakdown";
 
 interface ValidationErrors {
   monthlyInvestment?: string;
@@ -35,6 +37,8 @@ export function SIPCalculator() {
     nominalData: [],
   });
 
+  const width = useWindowDimensions().width;
+
   const validateInputs = (): boolean => {
     const newErrors: ValidationErrors = {};
 
@@ -55,7 +59,7 @@ export function SIPCalculator() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const calculateResults = () => {
+  const calculateResults = async () => {
     if (!validateInputs()) return;
 
     const { yearlyBalances, nominalYearlyBalances, years } = calculateSIP({
@@ -63,6 +67,25 @@ export function SIPCalculator() {
       returnRate: parseFloat(returnRate),
       duration: parseInt(duration),
       inflationRate: parseFloat(inflationRate),
+    });
+
+    const totalInvestment = parseInt(duration) * 12 * parseFloat(monthlyInvestment);
+    const expectedReturns = results.data[results.data.length - 1] - totalInvestment;
+    const totalValue = results.data[results.data.length - 1];
+
+    await saveCalculationHistory({
+      type: "SIP",
+      params: {
+        monthlyInvestment: parseFloat(monthlyInvestment),
+        returnRate: parseFloat(returnRate),
+        duration: parseInt(duration),
+        inflationRate: parseFloat(inflationRate),
+      },
+      results: {
+        totalInvestment,
+        expectedReturns,
+        totalValue,
+      },
     });
 
     setResults({
@@ -204,6 +227,17 @@ export function SIPCalculator() {
                 {((results.data[results.data.length - 1] / (parseInt(duration) * 12 * parseFloat(monthlyInvestment)) - 1) * 100).toFixed(1)}%
               </Text>
             </View>
+
+            <YearlyBreakdown
+              type="SIP"
+              data={results.data.map((balance, index) => ({
+                year: `Year ${index + 1}`,
+                investment: parseFloat(monthlyInvestment) * 12,
+                balance: balance,
+                returns: balance - parseFloat(monthlyInvestment) * 12 * (index + 1),
+              }))}
+              isSmallScreen={width < 375}
+            />
           </Animated.View>
         )}
       </ThemedView>

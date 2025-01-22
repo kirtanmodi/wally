@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Colors } from "@/constants/Colors";
+import { saveCalculationHistory } from "@/utils/history";
 
 interface ValidationErrors {
   initialInvestment?: string;
@@ -60,7 +61,7 @@ export function SWPCalculator() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const calculateResults = () => {
+  const calculateResults = async () => {
     if (!validateInputs()) return;
 
     const { yearlyBalances, years } = calculateSWP({
@@ -68,6 +69,23 @@ export function SWPCalculator() {
       monthlyWithdrawal: parseFloat(monthlyWithdrawal),
       returnRate: parseFloat(returnRate),
       duration: parseInt(duration),
+    });
+
+    const totalWithdrawals = parseInt(duration) * 12 * parseFloat(monthlyWithdrawal);
+    const finalBalance = yearlyBalances[yearlyBalances.length - 1];
+
+    await saveCalculationHistory({
+      type: "SWP",
+      params: {
+        initialInvestment: parseFloat(initialInvestment),
+        monthlyWithdrawal: parseFloat(monthlyWithdrawal),
+        returnRate: parseFloat(returnRate),
+        duration: parseInt(duration),
+      },
+      results: {
+        totalWithdrawals,
+        finalBalance,
+      },
     });
 
     setResults({

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View, TouchableOpacity, Platform, Alert } from "react-native";
+import { ScrollView, StyleSheet, View, TouchableOpacity, Platform, Alert, useWindowDimensions } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -31,10 +31,48 @@ interface CalculationHistory {
 }
 
 export default function ExploreScreen() {
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 375;
   const [history, setHistory] = useState<CalculationHistory[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
+
+  // Dynamic styles based on color scheme
+  const dynamicStyles = {
+    historyItem: {
+      backgroundColor: Platform.select({
+        web: colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(248, 249, 250, 0.8)',
+        default: Colors[colorScheme ?? 'light'].card,
+      }),
+      ...Platform.select({
+        web: {
+          backdropFilter: "blur(10px)",
+          boxShadow: colorScheme === "dark" ? "0 4px 6px rgba(0, 0, 0, 0.3)" : "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        default: {
+          elevation: 2,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: colorScheme === "dark" ? 0.3 : 0.2,
+          shadowRadius: 1.41,
+        },
+      }),
+    },
+    detailCard: {
+      backgroundColor: Platform.select({
+        ios: colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+        android: Colors[colorScheme ?? 'light'].background,
+        default: Colors[colorScheme ?? 'light'].background,
+      }),
+    },
+    emptyState: {
+      backgroundColor: Platform.select({
+        web: colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(248, 249, 250, 0.8)',
+        default: Colors[colorScheme ?? 'light'].card,
+      }),
+    },
+  };
 
   useEffect(() => {
     loadHistory();
@@ -72,10 +110,12 @@ export default function ExploreScreen() {
 
   const renderDetailCard = (item: CalculationHistory) => {
     return (
-      <ThemedView style={styles.detailCard}>
+      <ThemedView style={[dynamicStyles.detailCard, { padding: isSmallScreen ? 12 : 16 }]}>
         <View style={styles.detailHeader}>
-          <ThemedText type="subtitle">{item.type} Calculation Details</ThemedText>
-          <ThemedText style={styles.date}>{format(new Date(item.date), "PPp")}</ThemedText>
+          <ThemedText type="subtitle" style={isSmallScreen ? styles.smallTitle : undefined}>
+            {item.type} Calculation Details
+          </ThemedText>
+          <ThemedText style={styles.date}>{format(new Date(item.date), isSmallScreen ? "PP" : "PPp")}</ThemedText>
         </View>
 
         <View style={styles.detailSection}>
@@ -119,7 +159,14 @@ export default function ExploreScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.contentContainer, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 }]}
+      contentContainerStyle={[
+        styles.contentContainer,
+        {
+          paddingTop: insets.top + (isSmallScreen ? 12 : 16),
+          paddingBottom: insets.bottom + (isSmallScreen ? 12 : 16),
+          paddingHorizontal: isSmallScreen ? 12 : 16,
+        },
+      ]}
     >
       <View style={styles.header}>
         <ThemedText type="title">Calculation History</ThemedText>
@@ -131,7 +178,7 @@ export default function ExploreScreen() {
       </View>
 
       {history.length === 0 ? (
-        <ThemedView style={styles.emptyState}>
+        <ThemedView style={dynamicStyles.emptyState}>
           <MaterialCommunityIcons name="calculator-variant" size={48} color={Colors[colorScheme ?? "light"].icon} />
           <ThemedText type="subtitle" style={styles.emptyStateText}>
             No calculations yet
@@ -143,7 +190,11 @@ export default function ExploreScreen() {
           {history.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={[styles.historyItem, selectedItem === item.id && styles.selectedItem]}
+              style={[
+                styles.historyItem,
+                dynamicStyles.historyItem,
+                selectedItem === item.id && styles.selectedItem
+              ]}
               onPress={() => setSelectedItem(selectedItem === item.id ? null : item.id)}
             >
               <View style={styles.itemHeader}>
@@ -177,13 +228,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    flexGrow: 1,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 20,
   },
   clearButton: {
     padding: 8,
@@ -191,12 +242,8 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 32,
+    padding: 24,
     borderRadius: 16,
-    backgroundColor: Platform.select({
-      web: "rgba(248, 249, 250, 0.8)",
-      default: "#F8F9FA",
-    }),
   },
   emptyStateText: {
     marginTop: 16,
@@ -205,69 +252,53 @@ const styles = StyleSheet.create({
   emptyStateSubtext: {
     marginTop: 8,
     textAlign: "center",
-    color: "#666",
+    opacity: 0.7,
   },
   historyList: {
-    gap: 16,
+    gap: 12,
   },
   historyItem: {
     borderRadius: 16,
-    backgroundColor: Platform.select({
-      web: "rgba(248, 249, 250, 0.8)",
-      default: "#F8F9FA",
-    }),
     padding: 16,
-    ...Platform.select({
-      web: {
-        backdropFilter: "blur(10px)",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      },
-      default: {
-        elevation: 2,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.41,
-      },
-    }),
   },
   selectedItem: {
     borderWidth: 2,
-    borderColor: Colors.light.tint,
   },
   itemHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-
   typeContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
   itemType: {
+    fontSize: 15,
+  },
+  smallTitle: {
     fontSize: 16,
+    fontWeight: "600",
   },
   detailCard: {
-    marginTop: 16,
-    padding: 16,
+    marginTop: 12,
     borderRadius: 12,
-    backgroundColor: "white",
   },
   detailHeader: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   date: {
-    color: "#666",
-    fontSize: 14,
+    opacity: 0.6,
+    fontSize: 13,
     marginTop: 4,
   },
   detailSection: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   detailText: {
-    marginTop: 8,
-    color: "#666",
+    marginTop: 6,
+    opacity: 0.7,
+    fontSize: 14,
   },
 });
