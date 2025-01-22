@@ -17,12 +17,16 @@ export async function saveCalculationHistory(calculation: {
 		totalValue?: number;
 		totalWithdrawals?: number;
 		finalBalance?: number;
+		yearlyData: {
+			year: number;
+			investment?: number;
+			withdrawal?: number;
+			balance: number;
+			returns?: number;
+		}[];
 	};
 }) {
 	try {
-		const existingHistory = await AsyncStorage.getItem("calculationHistory");
-		const history = existingHistory ? JSON.parse(existingHistory) : [];
-
 		const newCalculation = {
 			id: Date.now().toString(),
 			type: calculation.type,
@@ -31,9 +35,8 @@ export async function saveCalculationHistory(calculation: {
 			results: calculation.results,
 		};
 
-		history.unshift(newCalculation);
-		await AsyncStorage.setItem("calculationHistory", JSON.stringify(history));
+		await AsyncStorage.setItem("calculationHistory", JSON.stringify(newCalculation));
 	} catch (error) {
-		Alert.alert("Error", "Failed to save calculation history");
+		Alert.alert("Error", "Failed to save calculation");
 	}
 } 

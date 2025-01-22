@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Platform } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
 import { Colors } from "@/constants/Colors";
@@ -72,30 +72,49 @@ export function YearlyBreakdown({ type, data, isSmallScreen }: YearlyBreakdownPr
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 16,
-    borderRadius: 12,
-    overflow: "hidden",
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+  },
+  card: {
+    padding: 16,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   title: {
-    fontSize: 18,
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  date: {
+    opacity: 0.6,
+    marginBottom: 24,
   },
   table: {
     borderRadius: 8,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   headerRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: Colors.light.tint,
     paddingVertical: 8,
   },
   dataRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 8,
   },
   headerCell: {
-    color: "white",
-    fontWeight: "600",
+    color: 'white',
+    fontWeight: '600',
     fontSize: 13,
   },
   cell: {
@@ -107,7 +126,11 @@ const styles = StyleSheet.create({
   },
   numberCell: {
     flex: 2,
-    textAlign: "right",
+    textAlign: 'right',
     paddingRight: 12,
+  },
+  emptyText: {
+    marginTop: 16,
+    textAlign: 'center',
   },
 }); 

@@ -42,8 +42,8 @@ export default function ExploreScreen() {
   const dynamicStyles = {
     historyItem: {
       backgroundColor: Platform.select({
-        web: colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(248, 249, 250, 0.8)',
-        default: Colors[colorScheme ?? 'light'].card,
+        web: colorScheme === "dark" ? "rgba(30, 41, 59, 0.8)" : "rgba(248, 249, 250, 0.8)",
+        default: Colors[colorScheme ?? "light"].card,
       }),
       ...Platform.select({
         web: {
@@ -61,15 +61,15 @@ export default function ExploreScreen() {
     },
     detailCard: {
       backgroundColor: Platform.select({
-        ios: colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-        android: Colors[colorScheme ?? 'light'].background,
-        default: Colors[colorScheme ?? 'light'].background,
+        ios: colorScheme === "dark" ? "rgba(30, 41, 59, 0.8)" : "rgba(255, 255, 255, 0.8)",
+        android: Colors[colorScheme ?? "light"].background,
+        default: Colors[colorScheme ?? "light"].background,
       }),
     },
     emptyState: {
       backgroundColor: Platform.select({
-        web: colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(248, 249, 250, 0.8)',
-        default: Colors[colorScheme ?? 'light'].card,
+        web: colorScheme === "dark" ? "rgba(30, 41, 59, 0.8)" : "rgba(248, 249, 250, 0.8)",
+        default: Colors[colorScheme ?? "light"].card,
       }),
     },
   };
@@ -81,6 +81,7 @@ export default function ExploreScreen() {
   const loadHistory = async () => {
     try {
       const savedHistory = await AsyncStorage.getItem("calculationHistory");
+      console.log(savedHistory);
       if (savedHistory) {
         setHistory(JSON.parse(savedHistory));
       }
@@ -118,40 +119,139 @@ export default function ExploreScreen() {
           <ThemedText style={styles.date}>{format(new Date(item.date), isSmallScreen ? "PP" : "PPp")}</ThemedText>
         </View>
 
-        <View style={styles.detailSection}>
-          <ThemedText type="defaultSemiBold">Input Parameters</ThemedText>
-          {item.type === "SIP" && (
-            <>
-              <ThemedText style={styles.detailText}>Monthly Investment: ₹{item.params.monthlyInvestment?.toLocaleString()}</ThemedText>
-              <ThemedText style={styles.detailText}>Inflation Rate: {item.params.inflationRate}%</ThemedText>
-            </>
-          )}
-          {item.type === "SWP" && (
-            <>
-              <ThemedText style={styles.detailText}>Initial Investment: ₹{item.params.initialInvestment?.toLocaleString()}</ThemedText>
-              <ThemedText style={styles.detailText}>Monthly Withdrawal: ₹{item.params.monthlyWithdrawal?.toLocaleString()}</ThemedText>
-            </>
-          )}
-          <ThemedText style={styles.detailText}>Return Rate: {item.params.returnRate}%</ThemedText>
-          <ThemedText style={styles.detailText}>Duration: {item.params.duration} years</ThemedText>
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.tableContainer}>
+            {/* Table Header */}
+            <View style={styles.tableHeader}>
+              <View style={[styles.tableCell, styles.headerCell]}>
+                <ThemedText type="defaultSemiBold" style={styles.headerText}>
+                  Parameter
+                </ThemedText>
+              </View>
+              <View style={[styles.tableCell, styles.headerCell]}>
+                <ThemedText type="defaultSemiBold" style={styles.headerText}>
+                  Value
+                </ThemedText>
+              </View>
+            </View>
 
-        <View style={styles.detailSection}>
-          <ThemedText type="defaultSemiBold">Results</ThemedText>
-          {item.type === "SIP" && (
-            <>
-              <ThemedText style={styles.detailText}>Total Investment: ₹{item.results.totalInvestment?.toLocaleString()}</ThemedText>
-              <ThemedText style={styles.detailText}>Expected Returns: ₹{item.results.expectedReturns?.toLocaleString()}</ThemedText>
-              <ThemedText style={styles.detailText}>Total Value: ₹{item.results.totalValue?.toLocaleString()}</ThemedText>
-            </>
-          )}
-          {item.type === "SWP" && (
-            <>
-              <ThemedText style={styles.detailText}>Total Withdrawals: ₹{item.results.totalWithdrawals?.toLocaleString()}</ThemedText>
-              <ThemedText style={styles.detailText}>Final Balance: ₹{item.results.finalBalance?.toLocaleString()}</ThemedText>
-            </>
-          )}
-        </View>
+            {/* Input Parameters Section */}
+            <View style={styles.tableSection}>
+              <ThemedText type="defaultSemiBold" style={styles.sectionHeader}>
+                Input Parameters
+              </ThemedText>
+              {item.type === "SIP" ? (
+                <>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Monthly Investment</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.params.monthlyInvestment?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Inflation Rate</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>{item.params.inflationRate}%</ThemedText>
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Initial Investment</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.params.initialInvestment?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Monthly Withdrawal</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.params.monthlyWithdrawal?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                </>
+              )}
+              <View style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <ThemedText style={styles.cellLabel}>Return Rate</ThemedText>
+                </View>
+                <View style={styles.tableCell}>
+                  <ThemedText style={styles.cellValue}>{item.params.returnRate}%</ThemedText>
+                </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <ThemedText style={styles.cellLabel}>Duration</ThemedText>
+                </View>
+                <View style={styles.tableCell}>
+                  <ThemedText style={styles.cellValue}>{item.params.duration} years</ThemedText>
+                </View>
+              </View>
+            </View>
+
+            {/* Results Section */}
+            <View style={styles.tableSection}>
+              <ThemedText type="defaultSemiBold" style={styles.sectionHeader}>
+                Results
+              </ThemedText>
+              {item.type === "SIP" ? (
+                <>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Total Investment</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.results.totalInvestment?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Expected Returns</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.results.expectedReturns?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Total Value</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.results.totalValue?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Total Withdrawals</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.results.totalWithdrawals?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellLabel}>Final Balance</ThemedText>
+                    </View>
+                    <View style={styles.tableCell}>
+                      <ThemedText style={styles.cellValue}>₹{item.results.finalBalance?.toLocaleString()}</ThemedText>
+                    </View>
+                  </View>
+                </>
+              )}
+            </View>
+          </View>
+        </ScrollView>
       </ThemedView>
     );
   };
@@ -187,36 +287,41 @@ export default function ExploreScreen() {
         </ThemedView>
       ) : (
         <View style={styles.historyList}>
-          {history.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.historyItem,
-                dynamicStyles.historyItem,
-                selectedItem === item.id && styles.selectedItem
-              ]}
-              onPress={() => setSelectedItem(selectedItem === item.id ? null : item.id)}
-            >
-              <View style={styles.itemHeader}>
-                <View style={styles.typeContainer}>
-                  <MaterialCommunityIcons
-                    name={item.type === "SIP" ? "chart-line" : "chart-timeline-variant"}
-                    size={24}
-                    color={Colors[colorScheme ?? "light"].text}
-                  />
-                  <ThemedText type="defaultSemiBold" style={styles.itemType}>
-                    {item.type} Calculation
-                  </ThemedText>
+          {history.length > 0 && history.map((item, index) => {
+            if (!item) {
+              console.warn(`Invalid history item at index ${index}`);
+              return null;
+            }
+            if (!item?.id || !item?.type) {
+              console.warn("Invalid history item:", item);
+              return null;
+            }
+
+            const iconName = item.type === "SIP" ? "chart-line" : "chart-timeline-variant";
+            const isSelected = selectedItem === item.id;
+
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.historyItem, dynamicStyles.historyItem, isSelected && styles.selectedItem]}
+                onPress={() => setSelectedItem(isSelected ? null : item.id)}
+                accessible={true}
+                accessibilityLabel={`${item.type} calculation history item`}
+                accessibilityHint="Double tap to view calculation details"
+              >
+                <View style={styles.itemHeader}>
+                  <View style={styles.typeContainer}>
+                    <MaterialCommunityIcons name={iconName} size={24} color={Colors[colorScheme ?? "light"].text} />
+                    <ThemedText type="defaultSemiBold" style={styles.itemType}>
+                      {item.type} Calculation
+                    </ThemedText>
+                  </View>
+                  <MaterialCommunityIcons name={isSelected ? "chevron-up" : "chevron-down"} size={24} color={Colors[colorScheme ?? "light"].text} />
                 </View>
-                <MaterialCommunityIcons
-                  name={selectedItem === item.id ? "chevron-up" : "chevron-down"}
-                  size={24}
-                  color={Colors[colorScheme ?? "light"].text}
-                />
-              </View>
-              {selectedItem === item.id && renderDetailCard(item)}
-            </TouchableOpacity>
-          ))}
+                {isSelected && renderDetailCard(item)}
+              </TouchableOpacity>
+              );
+            })} 
         </View>
       )}
     </ScrollView>
@@ -293,12 +398,67 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
   },
-  detailSection: {
-    marginBottom: 12,
+  tableContainer: {
+    minWidth: "100%",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginTop: 8,
   },
-  detailText: {
-    marginTop: 6,
-    opacity: 0.7,
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: Platform.select({
+      ios: "rgba(0,0,0,0.02)",
+      android: "rgba(0,0,0,0.04)",
+      default: "rgba(0,0,0,0.02)",
+    }),
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+  },
+  headerCell: {
+    backgroundColor: Platform.select({
+      ios: "rgba(0,0,0,0.02)",
+      android: "rgba(0,0,0,0.04)",
+      default: "rgba(0,0,0,0.02)",
+    }),
+  },
+  tableSection: {
+    marginTop: 16,
+  },
+  sectionHeader: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: Platform.select({
+      ios: "rgba(0,0,0,0.01)",
+      android: "rgba(0,0,0,0.02)",
+      default: "rgba(0,0,0,0.01)",
+    }),
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+  },
+  tableCell: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+  },
+  headerText: {
     fontSize: 14,
+    color: Platform.select({
+      ios: "#666",
+      android: "#555",
+      default: "#666",
+    }),
+  },
+  cellLabel: {
+    fontSize: 13,
+    color: "#666",
+  },
+  cellValue: {
+    fontSize: 13,
+    color: "#333",
+    fontWeight: "500",
   },
 });
