@@ -1,6 +1,7 @@
-import { Text, View } from "react-native";
+import { Text, useWindowDimensions, View } from "react-native";
 
 export default function Index() {
+  const { height, width } = useWindowDimensions();
   return (
     <View
       style={{
