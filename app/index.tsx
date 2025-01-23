@@ -10,7 +10,6 @@ export default function Index() {
       }}
     >
       <Text>Edit app/index.tsx to edit this screen.</Text>
-      <Link href="/test-error">Test Error</Link>
     </View>
   );
 }
