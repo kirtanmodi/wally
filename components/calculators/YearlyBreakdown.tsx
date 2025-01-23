@@ -18,6 +18,19 @@ interface YearlyBreakdownProps {
 
 export function YearlyBreakdown({ type, data, isSmallScreen }: YearlyBreakdownProps) {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  const dynamicStyles = {
+    table: {
+      borderColor: Colors[colorScheme].subtle,
+    },
+    headerRow: {
+      backgroundColor: Colors[colorScheme].tint,
+    },
+    alternateRow: {
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : Colors[colorScheme].subtle,
+    },
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -25,8 +38,8 @@ export function YearlyBreakdown({ type, data, isSmallScreen }: YearlyBreakdownPr
         Year-by-Year Breakdown
       </ThemedText>
 
-      <View style={styles.table}>
-        <View style={styles.headerRow}>
+      <View style={[styles.table, dynamicStyles.table]}>
+        <View style={[styles.headerRow, dynamicStyles.headerRow]}>
           <ThemedText style={[styles.headerCell, styles.yearCell]}>Year</ThemedText>
           {type === "SIP" ? (
             <>
@@ -40,27 +53,15 @@ export function YearlyBreakdown({ type, data, isSmallScreen }: YearlyBreakdownPr
         </View>
 
         {data.map((row, index) => (
-          <View
-            key={row.year}
-            style={[
-              styles.dataRow,
-              index % 2 === 0 && { backgroundColor: Colors[colorScheme ?? "light"].subtle },
-            ]}
-          >
+          <View key={row.year} style={[styles.dataRow, index % 2 === 0 && dynamicStyles.alternateRow]}>
             <ThemedText style={[styles.cell, styles.yearCell]}>{row.year}</ThemedText>
             {type === "SIP" ? (
               <>
-                <ThemedText style={[styles.cell, styles.numberCell]}>
-                  ₹{row.investment?.toLocaleString()}
-                </ThemedText>
-                <ThemedText style={[styles.cell, styles.numberCell]}>
-                  ₹{row.returns?.toLocaleString()}
-                </ThemedText>
+                <ThemedText style={[styles.cell, styles.numberCell]}>₹{row.investment?.toLocaleString()}</ThemedText>
+                <ThemedText style={[styles.cell, styles.numberCell]}>₹{row.returns?.toLocaleString()}</ThemedText>
               </>
             ) : (
-              <ThemedText style={[styles.cell, styles.numberCell]}>
-                ₹{row.withdrawals?.toLocaleString()}
-              </ThemedText>
+              <ThemedText style={[styles.cell, styles.numberCell]}>₹{row.withdrawals?.toLocaleString()}</ThemedText>
             )}
             <ThemedText style={[styles.cell, styles.numberCell]}>₹{row.balance.toLocaleString()}</ThemedText>
           </View>
@@ -101,24 +102,26 @@ const styles = StyleSheet.create({
   },
   table: {
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: Colors.light.subtle,
   },
   headerRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: Colors.light.tint,
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
   dataRow: {
-    flexDirection: 'row',
-    paddingVertical: 8,
+    flexDirection: "row",
+    paddingVertical: 12,
   },
   headerCell: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 13,
+    color: Colors.light.background,
+    fontWeight: "600",
+    fontSize: 14,
   },
   cell: {
-    fontSize: 13,
+    fontSize: 14,
   },
   yearCell: {
     flex: 1,
@@ -126,11 +129,11 @@ const styles = StyleSheet.create({
   },
   numberCell: {
     flex: 2,
-    textAlign: 'right',
+    textAlign: "right",
     paddingRight: 12,
   },
   emptyText: {
     marginTop: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
-}); 
+});

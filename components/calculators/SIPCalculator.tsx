@@ -228,16 +228,19 @@ export function SIPCalculator() {
               </Text>
             </View>
 
-            <YearlyBreakdown
-              type="SIP"
-              data={results.data.map((balance, index) => ({
-                year: `Year ${index + 1}`,
-                investment: parseFloat(monthlyInvestment) * 12,
-                balance: balance,
-                returns: balance - parseFloat(monthlyInvestment) * 12 * (index + 1),
-              }))}
-              isSmallScreen={width < 375}
-            />
+            <View style={[styles.card, styles.tableContainer]}>
+              <Text style={styles.cardTitle}>Yearly Breakdown</Text>
+              <YearlyBreakdown
+                type="SIP"
+                data={results.data.map((balance, index) => ({
+                  year: `Year ${index + 1}`,
+                  investment: parseFloat(monthlyInvestment) * 12,
+                  balance: balance,
+                  returns: balance - parseFloat(monthlyInvestment) * 12 * (index + 1),
+                }))}
+                isSmallScreen={width < 375}
+              />
+            </View>
           </Animated.View>
         )}
       </ThemedView>
@@ -356,13 +359,21 @@ const styles = StyleSheet.create({
       android: {
         elevation: 3,
       },
+      default: {
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+      },
     }),
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: Platform.select({
+      ios: 18,
+      android: 18,
+      default: 20,
+    }),
     fontWeight: "700",
     color: "#1a1a1a",
-    marginBottom: 12,
+    marginBottom: 16,
+    paddingHorizontal: 4,
   },
   summaryContainer: {
     marginTop: 24,
@@ -446,5 +457,37 @@ const styles = StyleSheet.create({
     color: "#4a4a4a",
     marginBottom: 6,
     lineHeight: 18,
+  },
+  tableContainer: {
+    marginBottom: 24,
+    overflow: "hidden",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    backgroundColor: "#F8FAFC",
+  },
+  tableHeaderCell: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#475569",
+    paddingHorizontal: 12,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 12,
+  },
+  tableRowEven: {
+    backgroundColor: "#FFFFFF",
+  },
+  tableRowOdd: {
+    backgroundColor: "#F8FAFC",
+  },
+  tableCell: {
+    fontSize: 14,
+    color: "#64748B",
+    paddingHorizontal: 12,
   },
 });

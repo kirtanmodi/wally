@@ -225,6 +225,35 @@ export function SWPCalculator() {
                   : "❌ This withdrawal rate depletes your portfolio. Consider reducing monthly withdrawals or exploring other income sources."}
               </Text>
             </View>
+
+            <View style={[styles.card, styles.tableContainer]}>
+              <Text style={styles.cardTitle}>Yearly Breakdown</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View>
+                  <View style={styles.tableHeader}>
+                    <Text style={[styles.tableHeaderCell, { width: 80 }]}>Year</Text>
+                    <Text style={[styles.tableHeaderCell, { width: 140 }]}>Balance</Text>
+                    <Text style={[styles.tableHeaderCell, { width: 140 }]}>Withdrawals</Text>
+                    <Text style={[styles.tableHeaderCell, { width: 140 }]}>Returns</Text>
+                  </View>
+                  {results.labels.map((year, index) => {
+                    const yearlyWithdrawal = parseFloat(monthlyWithdrawal) * 12;
+                    const previousBalance = index === 0 ? parseFloat(initialInvestment) : results.data[index - 1];
+                    const currentBalance = results.data[index];
+                    const yearlyReturns = currentBalance - previousBalance + yearlyWithdrawal;
+
+                    return (
+                      <View key={year} style={[styles.tableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}>
+                        <Text style={[styles.tableCell, { width: 80 }]}>Year {year}</Text>
+                        <Text style={[styles.tableCell, { width: 140 }]}>₹{Math.round(currentBalance).toLocaleString()}</Text>
+                        <Text style={[styles.tableCell, { width: 140 }]}>₹{Math.round(yearlyWithdrawal).toLocaleString()}</Text>
+                        <Text style={[styles.tableCell, { width: 140 }]}>₹{Math.round(yearlyReturns).toLocaleString()}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+            </View>
           </Animated.View>
         )}
       </ThemedView>
@@ -365,5 +394,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: "#666",
+  },
+  tableContainer: {
+    marginBottom: 24,
+    overflow: "hidden",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    backgroundColor: "#F8FAFC",
+  },
+  tableHeaderCell: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#475569",
+    paddingHorizontal: 12,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 12,
+  },
+  tableRowEven: {
+    backgroundColor: "#FFFFFF",
+  },
+  tableRowOdd: {
+    backgroundColor: "#F8FAFC",
+  },
+  tableCell: {
+    fontSize: 14,
+    color: "#64748B",
+    paddingHorizontal: 12,
   },
 });
