@@ -10,6 +10,12 @@ export default function Index() {
 
   return (
     <View>
+      <Text>
+        Window Dimensions: {width}x{height}
+      </Text>
+      <Text>Theme: {theme.mode}</Text>
+      <Text>Color Scheme: {isDarkMode ? "dark" : "light"}</Text>
+      <Button title="Test Error" onPress={() => console.log("Test Error")} />
       <MyComponent />
     </View>
   );
