@@ -1,5 +1,17 @@
 import { createTheme, darkColors, lightColors } from "@rneui/themed";
 
+export interface AppTheme {
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    error: string;
+    warning: string;
+    success: string;
+    disabled: string;
+  };
+}
+
 export const theme = createTheme({
   lightColors: {
     primary: "#3B82F6", // Modern blue
