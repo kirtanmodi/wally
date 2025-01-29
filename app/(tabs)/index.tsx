@@ -1,9 +1,9 @@
 import { Button, Text, useWindowDimensions, View, StyleSheet } from "react-native";
-import { useColorScheme } from "../hooks/useColorScheme";
 import MyComponent from "@/components/MyComponent";
 import { Card, useTheme } from "@rneui/themed";
 import { AppTheme } from "@/theme/Theme";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function Index() {
   const { height, width } = useWindowDimensions();
@@ -15,11 +15,6 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>My App</Text>
-        <ThemeToggle />
-      </View>
-
       <Text style={styles.windowText}>
         Window Dimensions: {width}x{height}
       </Text>
@@ -27,11 +22,7 @@ export default function Index() {
       <Text style={styles.themeText}>Color Scheme: {isDarkMode ? "dark" : "light"}</Text>
 
       <View style={styles.cardContainer}>
-        <Card containerStyle={styles.card}>
-          <Card.Title style={styles.cardTitle}>Card Title</Card.Title>
-          <Card.Divider />
-          <Card.Image source={{ uri: "https://picsum.photos/200/300" }} style={styles.cardImage} />
-        </Card>
+        <Card.Image source={{ uri: "https://picsum.photos/200/300" }} style={styles.cardImage} />
       </View>
     </View>
   );
@@ -41,6 +32,8 @@ const createStyles = (theme: AppTheme, isDarkMode: boolean, width: number, heigh
   return StyleSheet.create({
     container: {
       flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: isDarkMode ? theme.colors.background : "#FFFFFF",
     },
     header: {
@@ -68,6 +61,7 @@ const createStyles = (theme: AppTheme, isDarkMode: boolean, width: number, heigh
       marginBottom: 10,
     },
     cardContainer: {
+      justifyContent: "center",
       width: width * 0.9, // 90% of screen width
       maxHeight: height * 0.7, // 70% of screen height
       backgroundColor: isDarkMode ? theme.colors.background : theme.colors.primary,

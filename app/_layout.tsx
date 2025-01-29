@@ -13,7 +13,9 @@ export default function RootLayout() {
       <PersistGate loading={null} persistor={persistor}>
         <ThemeProvider theme={theme}>
           <ErrorBoundary FallbackComponent={CustomFallback} onError={errorHandler}>
-            <Stack />
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
           </ErrorBoundary>
         </ThemeProvider>
       </PersistGate>
