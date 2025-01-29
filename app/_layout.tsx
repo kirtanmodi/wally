@@ -17,14 +17,14 @@ export default function RootLayout() {
             <PaperProvider>
               <Stack>
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen
+                {/* <Stack.Screen
                   name="screens/SettingsScreen"
                   options={{
                     headerShown: true,
                     headerLeft: () => <Button icon={{ name: "arrow-back", type: "material" }} type="clear" onPress={() => router.back()} />,
                     title: "Settings",
                   }}
-                />
+                /> */}
               </Stack>
             </PaperProvider>
           </ErrorBoundary>
