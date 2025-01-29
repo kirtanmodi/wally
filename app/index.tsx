@@ -3,6 +3,7 @@ import { useColorScheme } from "../hooks/useColorScheme";
 import MyComponent from "@/components/MyComponent";
 import { Card, useTheme } from "@rneui/themed";
 import { AppTheme } from "@/theme/Theme";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Index() {
   const { height, width } = useWindowDimensions();
@@ -14,6 +15,11 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>My App</Text>
+        <ThemeToggle />
+      </View>
+
       <Text style={styles.windowText}>
         Window Dimensions: {width}x{height}
       </Text>
@@ -35,8 +41,21 @@ const createStyles = (theme: AppTheme, isDarkMode: boolean, width: number, heigh
   return StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: "center",
+      backgroundColor: isDarkMode ? theme.colors.background : "#FFFFFF",
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
       alignItems: "center",
+      padding: 16,
+      backgroundColor: isDarkMode ? theme.colors.background : "#FFFFFF",
+      borderBottomWidth: 1,
+      borderBottomColor: isDarkMode ? "#374151" : "#E5E7EB",
+    },
+    headerText: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: theme.colors.primary,
     },
     windowText: {
       fontSize: 16,
