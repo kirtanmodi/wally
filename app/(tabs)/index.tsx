@@ -4,6 +4,7 @@ import { Card, useTheme } from "@rneui/themed";
 import { AppTheme } from "@/theme/Theme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { router } from "expo-router";
 
 export default function Index() {
   const { height, width } = useWindowDimensions();
@@ -24,6 +25,9 @@ export default function Index() {
       <View style={styles.cardContainer}>
         <Card.Image source={{ uri: "https://picsum.photos/200/300" }} style={styles.cardImage} />
       </View>
+
+      {/* go to settings */}
+      <Button title="Go to Settings" onPress={() => router.push("/screens/SettingsScreen")} />
     </View>
   );
 }
